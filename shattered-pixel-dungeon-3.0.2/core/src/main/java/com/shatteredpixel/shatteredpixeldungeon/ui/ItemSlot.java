@@ -50,6 +50,7 @@ public class ItemSlot extends Button {
 	
 	private static final float ENABLED	= 1.0f;
 	private static final float DISABLED	= 0.3f;
+	private static final float UNAVAILABLE = 0.45f;
 
 	private Rect margin = new Rect();
 
@@ -59,6 +60,7 @@ public class ItemSlot extends Button {
 	protected BitmapText extra;
 	protected Image      itemIcon;
 	protected BitmapText level;
+	private boolean available = true;
 	
 	private static final String TXT_STRENGTH	= ":%d";
 	private static final String TXT_TYPICAL_STR	= "%d?";
@@ -173,7 +175,8 @@ public class ItemSlot extends Button {
 	}
 
 	public void alpha( float value ){
-		if (!active) value *= 0.3f;
+		if (!active) value *= DISABLED;
+		else if (!available) value *= UNAVAILABLE;
 		if (sprite != null)     sprite.alpha(value);
 		if (extra != null)      extra.alpha(value);
 		if (status != null)     status.alpha(value);
@@ -315,12 +318,21 @@ public class ItemSlot extends Button {
 			onPointerUp();
 		}
 		
-		float alpha = value ? ENABLED : DISABLED;
+		float alpha = value ? (available ? ENABLED : UNAVAILABLE) : DISABLED;
 		sprite.alpha( alpha );
 		status.alpha( alpha );
 		extra.alpha( alpha );
 		level.alpha( alpha );
 		if (itemIcon != null) itemIcon.alpha( alpha );
+	}
+
+	public void available( boolean value ) {
+		available = value;
+		refreshVisualState();
+	}
+
+	public void refreshVisualState() {
+		enable(active);
 	}
 
 	public void showExtraInfo( boolean show ){

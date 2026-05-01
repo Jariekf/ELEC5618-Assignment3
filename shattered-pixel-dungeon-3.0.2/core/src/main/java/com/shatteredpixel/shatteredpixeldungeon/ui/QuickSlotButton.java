@@ -135,6 +135,7 @@ public class QuickSlotButton extends Button {
 			@Override
 			protected void onPointerUp() {
 				sprite.resetColor();
+				refreshVisualState();
 			}
 
 			@Override
@@ -289,7 +290,12 @@ public class QuickSlotButton extends Button {
 	
 	public void item( Item item ) {
 		slot.item( item );
+		slot.available(item == null || item.isQuickslotUsable(Dungeon.hero));
 		enableSlot();
+	}
+
+	private void refreshVisualState() {
+		slot.available(slot.item == null || slot.item.isQuickslotUsable(Dungeon.hero));
 	}
 
 	public void enable( boolean value ) {

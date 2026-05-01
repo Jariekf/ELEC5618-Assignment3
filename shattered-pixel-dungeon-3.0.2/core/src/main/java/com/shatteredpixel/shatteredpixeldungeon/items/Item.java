@@ -183,6 +183,14 @@ public class Item implements Bundlable {
 			execute(hero, defaultAction());
 		}
 	}
+
+	public boolean isQuickslotUsable( Hero hero ) {
+		String action = defaultAction();
+		return hero != null
+				&& quantity() > 0
+				&& action != null
+				&& actions(hero).contains(action);
+	}
 	
 	protected void onThrow( int cell ) {
 		Heap heap = Dungeon.level.drop( this, cell );
