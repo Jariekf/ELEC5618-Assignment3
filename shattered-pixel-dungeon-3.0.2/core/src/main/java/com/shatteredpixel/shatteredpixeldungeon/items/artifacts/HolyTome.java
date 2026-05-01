@@ -149,6 +149,27 @@ public class HolyTome extends Artifact {
 				&& spell.canCast(hero);
 	}
 
+	@Override
+	public boolean isQuickslotUsable(Hero hero) {
+		if (!super.isQuickslotUsable(hero)) {
+			return false;
+		}
+
+		if (quickSpell != null) {
+			return canCast(hero, quickSpell);
+		}
+
+		for (int i = 1; i <= Talent.MAX_TALENT_TIERS; i++) {
+			for (ClericSpell spell : ClericSpell.getSpellList(hero, i)) {
+				if (canCast(hero, spell)) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
 	public void spendCharge( float chargesSpent ){
 		partialCharge -= chargesSpent;
 		while (partialCharge < 0){
@@ -240,6 +261,7 @@ public class HolyTome extends Artifact {
 				ActionIndicator.setAction((ActionIndicator.Action) passiveBuff);
 			}
 		}
+		updateQuickslot();
 	}
 
 	private static final String QUICK_CLS = "quick_cls";

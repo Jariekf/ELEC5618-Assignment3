@@ -328,6 +328,10 @@ public class ItemSlot extends Button {
 
 	public void available( boolean value ) {
 		available = value;
+		refreshVisualState();
+	}
+
+	public void refreshVisualState() {
 		enable(active);
 	}
 
