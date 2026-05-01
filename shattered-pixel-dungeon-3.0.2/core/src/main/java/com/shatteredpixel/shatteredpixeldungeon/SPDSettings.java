@@ -302,6 +302,7 @@ public class SPDSettings extends GameSettings {
 
 	public static final String KEY_CONTROLLER_SENS  = "controller_sens";
 	public static final String KEY_MOVE_SENS        = "move_sens";
+	public static final String KEY_SCREENSHOT_DIR   = "screenshot_dir";
 
 	public static void controllerPointerSensitivity( int value ){
 		put( KEY_CONTROLLER_SENS, value );
@@ -317,6 +318,14 @@ public class SPDSettings extends GameSettings {
 
 	public static int movementHoldSensitivity(){
 		return getInt(KEY_MOVE_SENS, 3, 0, 4);
+	}
+
+	public static void screenshotDir( String value ){
+		put(KEY_SCREENSHOT_DIR, value == null ? "" : value);
+	}
+
+	public static String screenshotDir(){
+		return getString(KEY_SCREENSHOT_DIR, "", 512);
 	}
 
 	//Connectivity

@@ -40,6 +40,7 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.RedButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Toolbar;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
+import com.shatteredpixel.shatteredpixeldungeon.utils.ScreenshotManager;
 import com.watabou.input.ControllerHandler;
 import com.watabou.noosa.ColorBlock;
 import com.watabou.noosa.Game;
@@ -709,6 +710,8 @@ public class WndSettings extends WndTabbed {
 
 		RedButton btnKeyBindings;
 		RedButton btnControllerBindings;
+		RedButton btnScreenshotDir;
+		RenderedTextBlock txtScreenshotDir;
 
 		ColorBlock sep2;
 
@@ -747,6 +750,30 @@ public class WndSettings extends WndTabbed {
 				};
 
 				add(btnControllerBindings);
+			}
+
+			if (DeviceCompat.isDesktop()) {
+				btnScreenshotDir = new RedButton(Messages.get(this, "screenshot_directory")) {
+					@Override
+					protected void onClick() {
+						super.onClick();
+						String selected = Game.platform.chooseDirectory(
+								Messages.get(InputTab.this, "screenshot_directory_title"),
+								ScreenshotManager.activeDirectoryPath()
+						);
+						if (selected != null && !selected.isEmpty()) {
+							SPDSettings.screenshotDir(selected);
+							updateScreenshotDirText();
+						}
+					}
+				};
+				add(btnScreenshotDir);
+
+				txtScreenshotDir = PixelScene.renderTextBlock(6);
+				txtScreenshotDir.maxWidth((int) width);
+				txtScreenshotDir.hardlight(0x888888);
+				add(txtScreenshotDir);
+				updateScreenshotDirText();
 			}
 
 			sep2 = new ColorBlock(1, 1, 0xFF000000);
@@ -808,6 +835,15 @@ public class WndSettings extends WndTabbed {
 				}
 			}
 
+			if (btnScreenshotDir != null) {
+				btnScreenshotDir.setRect(0, height + GAP, width, BTN_HEIGHT);
+				height = btnScreenshotDir.bottom();
+
+				txtScreenshotDir.maxWidth((int) width);
+				txtScreenshotDir.setPos(0, height + GAP);
+				height = txtScreenshotDir.bottom();
+			}
+
 			sep2.size(width, 1);
 			sep2.y = height+ GAP;
 
@@ -821,6 +857,13 @@ public class WndSettings extends WndTabbed {
 
 			height = optHoldMoveSens.bottom();
 
+		}
+
+		private void updateScreenshotDirText() {
+			if (txtScreenshotDir != null) {
+				txtScreenshotDir.text(Messages.get(this, "screenshot_directory_current",
+						ScreenshotManager.activeDirectoryPath()));
+			}
 		}
 	}
 
