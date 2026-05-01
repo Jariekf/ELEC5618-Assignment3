@@ -32,6 +32,7 @@ import com.watabou.input.ControllerHandler;
 import com.watabou.noosa.Game;
 import com.watabou.utils.PlatformSupport;
 import com.watabou.utils.Point;
+import org.lwjgl.util.tinyfd.TinyFileDialogs;
 
 import java.util.HashMap;
 import java.util.regex.Matcher;
@@ -102,6 +103,11 @@ public class DesktopPlatformSupport extends PlatformSupport {
 	public boolean supportsVibration() {
 		//only supports vibration via controller
 		return ControllerHandler.vibrationSupported();
+	}
+
+	@Override
+	public String chooseDirectory(String title, String initialPath) {
+		return TinyFileDialogs.tinyfd_selectFolderDialog(title, initialPath);
 	}
 
 	/* FONT SUPPORT */

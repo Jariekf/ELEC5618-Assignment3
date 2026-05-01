@@ -57,6 +57,10 @@ public abstract class PlatformSupport {
 		return Gdx.net.openURI( uri );
 	}
 
+	public String chooseDirectory( String title, String initialPath ){
+		return null;
+	}
+
 	public void setOnscreenKeyboardVisible(boolean value){
 		Gdx.input.setOnscreenKeyboardVisible(value);
 	}
