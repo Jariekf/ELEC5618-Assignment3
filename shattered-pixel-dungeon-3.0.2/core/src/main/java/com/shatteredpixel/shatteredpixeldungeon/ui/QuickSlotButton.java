@@ -289,6 +289,7 @@ public class QuickSlotButton extends Button {
 	
 	public void item( Item item ) {
 		slot.item( item );
+		slot.available(item == null || item.isQuickslotUsable(Dungeon.hero));
 		enableSlot();
 	}
 
