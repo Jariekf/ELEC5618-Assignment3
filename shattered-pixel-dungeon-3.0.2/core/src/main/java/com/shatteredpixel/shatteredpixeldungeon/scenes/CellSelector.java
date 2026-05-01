@@ -29,6 +29,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.tiles.DungeonTilemap;
+import com.shatteredpixel.shatteredpixeldungeon.utils.ScreenshotManager;
 import com.watabou.input.ControllerHandler;
 import com.watabou.input.GameAction;
 import com.watabou.input.KeyBindings;
@@ -277,6 +278,11 @@ public class CellSelector extends ScrollArea {
 		public boolean onSignal(KeyEvent event) {
 			GameAction action = KeyBindings.getActionForKey( event );
 			if (!event.pressed){
+
+				if (action == SPDAction.SCREENSHOT){
+					ScreenshotManager.capture();
+					return true;
+				}
 
 				if (action == SPDAction.ZOOM_IN){
 					zoom( camera.zoom+1 );
