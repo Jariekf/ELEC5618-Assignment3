@@ -235,6 +235,10 @@ public class StatusPane extends Component {
 	
 	private static final int[] warningColors = new int[]{0x660000, 0xCC0000, 0x660000};
 
+	public static boolean lowHealthWarning( int health, int max ){
+		return max > 0 && (health/(float)max) <= 0.3f;
+	}
+
 	private int oldHP = 0;
 	private int oldShield = 0;
 	private int oldMax = 0;
@@ -249,7 +253,7 @@ public class StatusPane extends Component {
 
 		if (!Dungeon.hero.isAlive()) {
 			avatar.tint(0x000000, 0.5f);
-		} else if ((health/(float)max) <= 0.3f) {
+		} else if (lowHealthWarning(health, max)) {
 			warning += Game.elapsed * 5f *(0.4f - (health/(float)max));
 			warning %= 1f;
 			avatar.tint(ColorMath.interpolate(warning, warningColors), 0.5f );

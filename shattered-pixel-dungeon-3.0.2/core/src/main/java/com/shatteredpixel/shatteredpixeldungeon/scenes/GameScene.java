@@ -701,6 +701,9 @@ public class GameScene extends PixelScene {
 	//the actor thread processes at a maximum of 60 times a second
 	//this caps the speed of resting for higher refresh rate displays
 	private float notifyDelay = 1/60f;
+	private static final float LOW_HEALTH_FLASH_INTERVAL = 2f;
+	private static final float LOW_HEALTH_FLASH_DURATION = 0.45f;
+	private float timeSinceFlash = LOW_HEALTH_FLASH_INTERVAL;
 
 	public static boolean updateItemDisplays = false;
 
@@ -730,6 +733,7 @@ public class GameScene extends PixelScene {
 		super.update();
 
 		if (notifyDelay > 0) notifyDelay -= Game.elapsed;
+		timeSinceFlash += Game.elapsed;
 
 		if (!Emitter.freezeEmitters) {
 			waterOfs -= 5 * Game.elapsed;
@@ -804,6 +808,12 @@ public class GameScene extends PixelScene {
 				g.destroy();
 			}
 			toDestroy.clear();
+		}
+
+		if (Dungeon.hero.isAlive()
+				&& StatusPane.lowHealthWarning(Dungeon.hero.HP, Dungeon.hero.HT)
+				&& timeSinceFlash >= LOW_HEALTH_FLASH_INTERVAL) {
+			flashLowHealthWarning();
 		}
 	}
 
@@ -1356,6 +1366,7 @@ public class GameScene extends PixelScene {
 
 	public static void flash( int color, boolean lightmode ) {
 		if (scene != null) {
+			scene.timeSinceFlash = 0f;
 			//don't want to do this on the actor thread
 			ShatteredPixelDungeon.runOnRenderThread(new Callback() {
 				@Override
@@ -1369,6 +1380,14 @@ public class GameScene extends PixelScene {
 				}
 			});
 		}
+	}
+
+	private void flashLowHealthWarning() {
+		float healthPercent = Dungeon.hero.HP / (float)Dungeon.hero.HT;
+		float criticality = GameMath.gate(0f, 1f - healthPercent / 0.3f, 1f);
+		int red = 0x10 + Math.round(0x14 * criticality);
+		timeSinceFlash = 0f;
+		fadeIn(0xFF000000 | (red << 16), true, LOW_HEALTH_FLASH_DURATION);
 	}
 
 	public static void gameOver() {
