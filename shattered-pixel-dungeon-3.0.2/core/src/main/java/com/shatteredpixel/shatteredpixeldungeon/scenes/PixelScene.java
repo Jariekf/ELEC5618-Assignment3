@@ -361,7 +361,11 @@ public class PixelScene extends Scene {
 	}
 	
 	protected void fadeIn( int color, boolean light ) {
-		add( new Fader( color, light ) );
+		fadeIn( color, light, Fader.DEFAULT_FADE_TIME );
+	}
+
+	protected void fadeIn( int color, boolean light, float duration ) {
+		add( new Fader( color, light, duration ) );
 	}
 	
 	public static void showBadge( Badges.Badge badge ) {
@@ -399,23 +403,29 @@ public class PixelScene extends Scene {
 	
 	protected static class Fader extends ColorBlock {
 		
-		private static float FADE_TIME = 1f;
+		public static final float DEFAULT_FADE_TIME = 1f;
 		
 		private boolean light;
 		
 		private float time;
+		private final float duration;
 
 		private static Fader INSTANCE;
 		
 		public Fader( int color, boolean light ) {
+			this( color, light, DEFAULT_FADE_TIME );
+		}
+
+		public Fader( int color, boolean light, float duration ) {
 			super( uiCamera.width, uiCamera.height, color );
 			
 			this.light = light;
+			this.duration = duration;
 			
 			camera = uiCamera;
 			
 			alpha( 1f );
-			time = FADE_TIME;
+			time = duration;
 
 			if (INSTANCE != null){
 				INSTANCE.killAndErase();
@@ -436,7 +446,7 @@ public class PixelScene extends Scene {
 					INSTANCE = null;
 				}
 			} else {
-				alpha( time / FADE_TIME );
+				alpha( time / duration );
 			}
 		}
 		
