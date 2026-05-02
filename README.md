@@ -1,4 +1,12 @@
-# Shattered_Pixel_Dungeon_v3.0.2-Improvements
-ELEC5618 Assignment 3 quality improvement project based on Shattered Pixel Dungeon v3.0.2.
 # Introduction
-Shattered Pixel Dungeon is a popular open-source roguelike game that has garnered a large following, but like many games, it has areas that could be improved to enhance the player experience. This project focuses on identifying and implementing quality improvements in Shattered Pixel Dungeon v3.0.2, with the goal of making the game more enjoyable and engaging for players.
+This repository contains the work for **ELEC5618 Assignment 3**, which requires the team to implement three quality improvements for **Shattered Pixel Dungeon v3.0.2**. The purpose of this assignment is to identify quality issues in the existing system, modify the source code to address these issues, and verify that the improvements enhance the software quality without breaking the original game behaviour.
+
+In this assignment, our team proposed and implemented two original improvements: **Unavailable Item Visual Feedback in Quick-slot** and **Critical Health Screen Warning**. These improvements focus on improving usability, operability, user error protection, and visual feedback during gameplay. In addition, we selected one predefined improvement from the tutor-provided list: **Configurable In-game Screenshot Shortcut**. This improvement allows users to capture gameplay screenshots through a configurable in-game shortcut.
+
+Together, these three improvements aim to make the game easier to operate, clearer to understand, and more convenient to use, while preserving the original gameplay mechanics and balance.
+
+## Improvement 1: Configurable In-game Screenshot Shortcut
+
+## Improvement 2: Unavailable Item Visual Feedback in Quick-slot
+
+## Improvement 3: Critical Health Screen Warning
