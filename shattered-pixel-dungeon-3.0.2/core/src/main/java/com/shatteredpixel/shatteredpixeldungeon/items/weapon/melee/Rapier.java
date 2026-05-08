@@ -28,6 +28,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.Door;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -68,6 +69,30 @@ public class Rapier extends MeleeWeapon {
 	}
 
 	@Override
+	public boolean isQuickslotUsable(Hero hero) {
+		if (!super.isQuickslotUsable(hero)) {
+			return false;
+		}
+
+		if (!AC_ABILITY.equals(defaultAction())
+				|| hero.heroClass != HeroClass.DUELIST
+				|| !isEquipped(hero)) {
+			return true;
+		}
+
+		if (STRReq() > hero.STR()) {
+			return false;
+		}
+
+		Charger charger = hero.buff(Charger.class);
+		if (charger == null || (charger.charges + charger.partialCharge) < abilityChargeUse(hero, null)) {
+			return false;
+		}
+
+		return true;
+	}
+
+	@Override
 	protected void duelistAbility(Hero hero, Integer target) {
 		//+(5+1.5*lvl) damage, roughly +111% base damage, +100% scaling
 		int dmgBoost =  augment.damageFactor(5 + Math.round(1.5f*buffedLvl()));
@@ -87,6 +112,20 @@ public class Rapier extends MeleeWeapon {
 	public String upgradeAbilityStat(int level){
 		int dmgBoost = 5 + Math.round(1.5f*level);
 		return augment.damageFactor(min(level)+dmgBoost) + "-" + augment.damageFactor(max(level)+dmgBoost);
+	}
+
+	private static int findLungeCell(Hero hero, int target, MeleeWeapon wep) {
+		int lungeCell = -1;
+		for (int i : PathFinder.NEIGHBOURS8){
+			if (Dungeon.level.distance(hero.pos+i, target) <= wep.reachFactor(hero)
+					&& Actor.findChar(hero.pos+i) == null
+					&& (Dungeon.level.passable[hero.pos+i] || (Dungeon.level.avoid[hero.pos+i] && hero.flying))){
+				if (lungeCell == -1 || Dungeon.level.trueDistance(hero.pos + i, target) < Dungeon.level.trueDistance(lungeCell, target)){
+					lungeCell = hero.pos + i;
+				}
+			}
+		}
+		return lungeCell;
 	}
 
 	public static void lungeAbility(Hero hero, Integer target, float dmgMulti, int dmgBoost, MeleeWeapon wep){
@@ -110,17 +149,7 @@ public class Rapier extends MeleeWeapon {
 			return;
 		}
 
-		int lungeCell = -1;
-		for (int i : PathFinder.NEIGHBOURS8){
-			if (Dungeon.level.distance(hero.pos+i, target) <= wep.reachFactor(hero)
-					&& Actor.findChar(hero.pos+i) == null
-					&& (Dungeon.level.passable[hero.pos+i] || (Dungeon.level.avoid[hero.pos+i] && hero.flying))){
-				if (lungeCell == -1 || Dungeon.level.trueDistance(hero.pos + i, target) < Dungeon.level.trueDistance(lungeCell, target)){
-					lungeCell = hero.pos + i;
-				}
-			}
-		}
-
+		int lungeCell = findLungeCell(hero, target, wep);
 		if (lungeCell == -1){
 			GLog.w(Messages.get(wep, "ability_target_range"));
 			return;
