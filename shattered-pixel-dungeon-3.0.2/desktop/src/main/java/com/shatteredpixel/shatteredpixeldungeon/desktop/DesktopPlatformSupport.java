@@ -27,6 +27,7 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.PixmapPacker;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.utils.SharedLibraryLoader;
 import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.watabou.input.ControllerHandler;
 import com.watabou.noosa.Game;
@@ -34,6 +35,10 @@ import com.watabou.utils.PlatformSupport;
 import com.watabou.utils.Point;
 import org.lwjgl.util.tinyfd.TinyFileDialogs;
 
+import javax.swing.JFileChooser;
+import java.awt.FileDialog;
+import java.awt.Frame;
+import java.io.File;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -107,7 +112,103 @@ public class DesktopPlatformSupport extends PlatformSupport {
 
 	@Override
 	public String chooseDirectory(String title, String initialPath) {
-		return TinyFileDialogs.tinyfd_selectFolderDialog(title, initialPath);
+		String selectedPath = chooseDirectoryWithTinyFileDialogs(title, initialPath);
+		if (selectedPath != null && !selectedPath.isEmpty()) {
+			return selectedPath;
+		}
+
+		if (SharedLibraryLoader.isMac) {
+			return chooseDirectoryWithMacFallback(title, initialPath);
+		}
+
+		return null;
+	}
+
+	private String chooseDirectoryWithTinyFileDialogs(String title, String initialPath) {
+		try {
+			return TinyFileDialogs.tinyfd_selectFolderDialog(title, initialPath);
+		} catch (Throwable ignored) {
+			return null;
+		}
+	}
+
+	private String chooseDirectoryWithMacFallback(String title, String initialPath) {
+		try {
+			String selectedPath = chooseDirectoryWithMacFileDialog(title, initialPath);
+			if (selectedPath != null && !selectedPath.isEmpty()) {
+				return selectedPath;
+			}
+		} catch (Throwable ignored) {
+			// Fall through to the Swing chooser if the native AWT dialog fails.
+		}
+
+		try {
+			return chooseDirectoryWithSwingChooser(title, initialPath);
+		} catch (Throwable ignored) {
+			return null;
+		}
+	}
+
+	private String chooseDirectoryWithMacFileDialog(String title, String initialPath) {
+		File initialDirectory = normalizeInitialDirectory(initialPath);
+		String previousDirectoryMode = System.getProperty("apple.awt.fileDialogForDirectories");
+		System.setProperty("apple.awt.fileDialogForDirectories", "true");
+		try {
+			FileDialog dialog = new FileDialog((Frame) null, title, FileDialog.LOAD);
+			if (initialDirectory != null) {
+				dialog.setDirectory(initialDirectory.getAbsolutePath());
+			}
+			dialog.setVisible(true);
+
+			File[] selectedFiles = dialog.getFiles();
+			if (selectedFiles != null && selectedFiles.length > 0 && selectedFiles[0] != null) {
+				return selectedFiles[0].getAbsolutePath();
+			} else if (dialog.getFile() != null) {
+				File directory = dialog.getDirectory() == null
+						? new File(dialog.getFile())
+						: new File(dialog.getDirectory(), dialog.getFile());
+				return directory.getAbsolutePath();
+			}
+			return null;
+		} finally {
+			if (previousDirectoryMode == null) {
+				System.clearProperty("apple.awt.fileDialogForDirectories");
+			} else {
+				System.setProperty("apple.awt.fileDialogForDirectories", previousDirectoryMode);
+			}
+		}
+	}
+
+	private String chooseDirectoryWithSwingChooser(String title, String initialPath) {
+		File initialDirectory = normalizeInitialDirectory(initialPath);
+		JFileChooser chooser = new JFileChooser();
+		chooser.setDialogTitle(title);
+		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		chooser.setAcceptAllFileFilterUsed(false);
+		if (initialDirectory != null) {
+			chooser.setCurrentDirectory(initialDirectory);
+			chooser.setSelectedFile(initialDirectory);
+		}
+
+		int result = chooser.showOpenDialog(null);
+		if (result == JFileChooser.APPROVE_OPTION && chooser.getSelectedFile() != null) {
+			return chooser.getSelectedFile().getAbsolutePath();
+		}
+		return null;
+	}
+
+	private File normalizeInitialDirectory(String initialPath) {
+		if (initialPath == null || initialPath.isEmpty()) {
+			return null;
+		}
+
+		File initialFile = new File(initialPath);
+		if (initialFile.isDirectory()) {
+			return initialFile;
+		}
+
+		File parent = initialFile.getParentFile();
+		return parent != null && parent.isDirectory() ? parent : null;
 	}
 
 	/* FONT SUPPORT */

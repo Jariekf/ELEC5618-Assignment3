@@ -21,6 +21,8 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.windows;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.utils.SharedLibraryLoader;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Chrome;
 import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
@@ -705,6 +707,8 @@ public class WndSettings extends WndTabbed {
 
 	private static class InputTab extends Component{
 
+		private static boolean screenshotDirectorySelectionPending = false;
+
 		RenderedTextBlock title;
 		ColorBlock sep1;
 
@@ -757,14 +761,7 @@ public class WndSettings extends WndTabbed {
 					@Override
 					protected void onClick() {
 						super.onClick();
-						String selected = Game.platform.chooseDirectory(
-								Messages.get(InputTab.this, "screenshot_directory_title"),
-								ScreenshotManager.activeDirectoryPath()
-						);
-						if (selected != null && !selected.isEmpty()) {
-							SPDSettings.screenshotDir(selected);
-							updateScreenshotDirText();
-						}
+						chooseScreenshotDirectory();
 					}
 				};
 				add(btnScreenshotDir);
@@ -857,6 +854,71 @@ public class WndSettings extends WndTabbed {
 
 			height = optHoldMoveSens.bottom();
 
+		}
+
+		private void chooseScreenshotDirectory() {
+			if (screenshotDirectorySelectionPending) {
+				return;
+			}
+
+			screenshotDirectorySelectionPending = true;
+			btnScreenshotDir.enable(false);
+
+			final boolean wasFullscreen = SPDSettings.fullscreen();
+			final String initialPath = ScreenshotManager.activeDirectoryPath();
+			final String chooserTitle = Messages.get(this, "screenshot_directory_title");
+
+			Gdx.app.postRunnable(new Runnable() {
+				@Override
+				public void run() {
+					if (wasFullscreen && SharedLibraryLoader.isMac) {
+						GameScene.show(new WndMessage(
+								"Custom screenshot folder selection is unavailable in fullscreen mode on macOS. " +
+								"The current screenshot folder will be kept."
+						));
+						finishScreenshotDirectorySelection();
+						return;
+					}
+
+					if (wasFullscreen) {
+						SPDSettings.fullscreen(false);
+						Game.platform.updateSystemUI();
+						Gdx.app.postRunnable(new Runnable() {
+							@Override
+							public void run() {
+								openScreenshotDirectoryChooser(chooserTitle, initialPath, true);
+							}
+						});
+					} else {
+						openScreenshotDirectoryChooser(chooserTitle, initialPath, false);
+					}
+				}
+			});
+		}
+
+		private void openScreenshotDirectoryChooser(String title, String initialPath, boolean restoreFullscreen) {
+			try {
+				String selected = Game.platform.chooseDirectory(title, initialPath);
+				if (selected != null && !selected.isEmpty()) {
+					SPDSettings.screenshotDir(selected);
+					updateScreenshotDirText();
+				}
+			} catch (Throwable ignored) {
+				// Keep the existing screenshot directory unchanged if selection fails.
+			} finally {
+				if (restoreFullscreen) {
+					SPDSettings.fullscreen(true);
+					Game.platform.updateSystemUI();
+				}
+				finishScreenshotDirectorySelection();
+			}
+		}
+
+		private void finishScreenshotDirectorySelection() {
+			screenshotDirectorySelectionPending = false;
+			if (btnScreenshotDir != null) {
+				btnScreenshotDir.enable(true);
+			}
 		}
 
 		private void updateScreenshotDirText() {
