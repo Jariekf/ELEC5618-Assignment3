@@ -864,6 +864,12 @@ public class WndSettings extends WndTabbed {
 			screenshotDirectorySelectionPending = true;
 			btnScreenshotDir.enable(false);
 
+			if (SharedLibraryLoader.isMac) {
+				showMacScreenshotDirectoryUnsupportedMessage();
+				finishScreenshotDirectorySelection();
+				return;
+			}
+
 			final boolean wasFullscreen = SPDSettings.fullscreen();
 			final String initialPath = ScreenshotManager.activeDirectoryPath();
 			final String chooserTitle = Messages.get(this, "screenshot_directory_title");
@@ -871,15 +877,6 @@ public class WndSettings extends WndTabbed {
 			Gdx.app.postRunnable(new Runnable() {
 				@Override
 				public void run() {
-					if (wasFullscreen && SharedLibraryLoader.isMac) {
-						GameScene.show(new WndMessage(
-								"Custom screenshot folder selection is unavailable in fullscreen mode on macOS. " +
-								"The current screenshot folder will be kept."
-						));
-						finishScreenshotDirectorySelection();
-						return;
-					}
-
 					if (wasFullscreen) {
 						SPDSettings.fullscreen(false);
 						Game.platform.updateSystemUI();
@@ -894,6 +891,10 @@ public class WndSettings extends WndTabbed {
 					}
 				}
 			});
+		}
+
+		private void showMacScreenshotDirectoryUnsupportedMessage() {
+			GameScene.show(new WndMessage(Messages.get(this, "screenshot_directory_unsupported_mac")));
 		}
 
 		private void openScreenshotDirectoryChooser(String title, String initialPath, boolean restoreFullscreen) {

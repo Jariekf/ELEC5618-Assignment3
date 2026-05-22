@@ -45,6 +45,11 @@ public class ScreenshotMessageResourcesTest {
         assertNotNull(
                 properties.getProperty("windows.wndsettings$inputtab.screenshot_directory_current")
         );
+
+        assertEquals(
+                "Due to macOS permission restrictions, changing the screenshot folder is not supported. You can check the screenshot location in Current folder.",
+                properties.getProperty("windows.wndsettings$inputtab.screenshot_directory_unsupported_mac")
+        );
     }
 
     // Test Case 2: Verify screenshot success and failure messages exist
