@@ -25,11 +25,13 @@ Run the following command in the project root directory:
 cd shattered-pixel-dungeon-3.0.2
 windows: ./gradlew.bat desktop:debug
 macos: ./gradlew desktop:debug
----
+```
 
 If terminal shows a permission denied error, grant execution permission to the Gradle wrapper first:
+
 ```bash
 chmod +x gradlew
+```
 ---
 
 ## Improvement 1: Configurable In-game Screenshot Shortcut
