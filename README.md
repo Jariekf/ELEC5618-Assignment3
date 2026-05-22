@@ -17,6 +17,19 @@ In this assignment, our group implemented three source code level quality improv
 
 Together, these improvements aim to make the game easier to operate, clearer to understand, and more convenient to use, while preserving the original gameplay mechanics and balance.
 
+## How to Run the Game
+
+Run the following command in the project root directory:
+
+```bash
+cd shattered-pixel-dungeon-3.0.2
+windows: ./gradlew.bat desktop:debug
+macos: ./gradlew desktop:debug
+---
+
+If terminal shows a permission denied error, grant execution permission to the Gradle wrapper first:
+```bash
+chmod +x gradlew
 ---
 
 ## Improvement 1: Configurable In-game Screenshot Shortcut
