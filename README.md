@@ -32,6 +32,14 @@ If terminal shows a permission denied error, grant execution permission to the G
 ```bash
 chmod +x gradlew
 ```
+
+## Generate JaCoCo Coverage Report
+```bash
+windows: ./gradlew.bat :core:a3ImprovementRelatedCodeCoverage --console=plain
+macos: ./gradlew :core:a3ImprovementRelatedCodeCoverage --console=plain
+```
+Report Location: core/build/reports/jacoco/a3-improvement-related-code-coverage/jacoco-html/index.html
+
 ---
 
 ## Improvement 1: Configurable In-game Screenshot Shortcut
