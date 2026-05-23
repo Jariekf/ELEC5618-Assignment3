@@ -17,6 +17,29 @@ In this assignment, our group implemented three source code level quality improv
 
 Together, these improvements aim to make the game easier to operate, clearer to understand, and more convenient to use, while preserving the original gameplay mechanics and balance.
 
+## How to Run the Game
+
+Run the following command in the project root directory:
+
+```bash
+cd shattered-pixel-dungeon-3.0.2
+windows: ./gradlew.bat desktop:debug
+macos: ./gradlew desktop:debug
+```
+
+If terminal shows a permission denied error, grant execution permission to the Gradle wrapper first:
+
+```bash
+chmod +x gradlew
+```
+
+## Generate JaCoCo Coverage Report
+```bash
+windows: ./gradlew.bat :core:a3ImprovementRelatedCodeCoverage --console=plain
+macos: ./gradlew :core:a3ImprovementRelatedCodeCoverage --console=plain
+```
+Report Location: core/build/reports/jacoco/a3-improvement-related-code-coverage/jacoco-html/index.html
+
 ---
 
 ## Improvement 1: Configurable In-game Screenshot Shortcut
