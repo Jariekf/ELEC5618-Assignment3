@@ -1,7 +1,37 @@
 apply plugin: 'java-library'
+apply plugin: 'jacoco'
 
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 sourceCompatibility = targetCompatibility = appJavaCompatibility
+
+def a3CoverageTests = [
+        'com.shatteredpixel.shatteredpixeldungeon.ScreenshotActionTest',
+        'com.shatteredpixel.shatteredpixeldungeon.ScreenshotMessageResourcesTest',
+        'com.shatteredpixel.shatteredpixeldungeon.items.ItemQuickslotUsabilityTest',
+        'com.shatteredpixel.shatteredpixeldungeon.ui.QuickslotVisualFeedbackStructureTest',
+        'com.shatteredpixel.shatteredpixeldungeon.ui.StatusPaneLowHealthWarningTest',
+        'com.shatteredpixel.shatteredpixeldungeon.scenes.CriticalHealthWarningStructureTest'
+]
+
+def a3CoverageClassIncludes = [
+        'com/shatteredpixel/shatteredpixeldungeon/SPDAction*.class',
+        'com/shatteredpixel/shatteredpixeldungeon/SPDSettings*.class',
+        'com/shatteredpixel/shatteredpixeldungeon/items/Item*.class',
+        'com/shatteredpixel/shatteredpixeldungeon/scenes/CellSelector*.class',
+        'com/shatteredpixel/shatteredpixeldungeon/scenes/GameScene*.class',
+        'com/shatteredpixel/shatteredpixeldungeon/scenes/PixelScene*.class',
+        'com/shatteredpixel/shatteredpixeldungeon/ui/ItemSlot*.class',
+        'com/shatteredpixel/shatteredpixeldungeon/ui/QuickSlotButton*.class',
+        'com/shatteredpixel/shatteredpixeldungeon/ui/StatusPane*.class',
+        'com/shatteredpixel/shatteredpixeldungeon/utils/ScreenshotManager*.class',
+        'com/shatteredpixel/shatteredpixeldungeon/windows/WndSettings*.class'
+]
+
+def a3CoverageReportDir = layout.buildDirectory.dir('reports/jacoco/a3-improvement-related-code-coverage')
+
+jacoco {
+    toolVersion = '0.8.12'
+}
 
 dependencies {
     api project(':SPD-classes')
@@ -13,4 +43,89 @@ dependencies {
     implementation project(':services')
 
     testImplementation 'junit:junit:4.13.2'
+}
+
+tasks.register('a3ImprovementRelatedTest', Test) {
+    group = 'verification'
+    description = 'Runs Assignment 3 improvement-related unit tests only.'
+
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+
+    useJUnit()
+    filter {
+        a3CoverageTests.each { includeTestsMatching(it) }
+    }
+
+    jacoco {
+        destinationFile = layout.buildDirectory.file('jacoco/a3ImprovementRelatedTest.exec').get().asFile
+    }
+}
+
+tasks.register('a3ImprovementRelatedCodeCoverageReport', JacocoReport) {
+    group = 'verification'
+    description = 'Generates JaCoCo coverage for Assignment 3 improvement-related tests and classes.'
+
+    dependsOn tasks.named('a3ImprovementRelatedTest')
+
+    executionData.from(layout.buildDirectory.file('jacoco/a3ImprovementRelatedTest.exec'))
+    sourceDirectories.from(files(sourceSets.main.allSource.srcDirs))
+    classDirectories.from(files(sourceSets.main.output).asFileTree.matching {
+        include a3CoverageClassIncludes
+    })
+
+    reports {
+        html.required = true
+        html.outputLocation = a3CoverageReportDir.map { it.dir('jacoco-html') }
+        xml.required = true
+        xml.outputLocation = a3CoverageReportDir.map { it.file('jacoco.xml') }
+        csv.required = false
+    }
+}
+
+tasks.register('a3ImprovementRelatedCoverageLandingPage') {
+    group = 'verification'
+    description = 'Creates the labelled landing page for the Assignment 3 improvement coverage report.'
+
+    dependsOn tasks.named('a3ImprovementRelatedCodeCoverageReport')
+
+    doLast {
+        def reportDir = a3CoverageReportDir.get().asFile
+        reportDir.mkdirs()
+        new File(reportDir, 'index.html').text = """<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>A3 improvement related code coverage</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 2rem auto;
+            max-width: 860px;
+            line-height: 1.5;
+            color: #222;
+        }
+        code {
+            background: #f3f3f3;
+            padding: 0.1rem 0.3rem;
+        }
+    </style>
+</head>
+<body>
+    <h1>A3 improvement related code coverage</h1>
+    <p>This report is limited to Assignment 3 improvement-related tests and the existing classes they modify or exercise. It is not intended to represent full-project coverage.</p>
+    <p>The overall percentage may appear low because these changes live inside a much larger pre-existing game codebase, and our unit tests target only the specific logic modified for Assignment 3.</p>
+    <p>JaCoCo can report executable class and method coverage, so it covers the improvement-related Java classes in this subset report. Screenshot message resource tests are still part of the Assignment 3 test suite, but the <code>.properties</code> files themselves do not appear in JaCoCo because they are not executable code.</p>
+    <p><a href="jacoco-html/index.html">Open the JaCoCo HTML report</a></p>
+</body>
+</html>
+"""
+    }
+}
+
+tasks.register('a3ImprovementRelatedCodeCoverage') {
+    group = 'verification'
+    description = 'Runs Assignment 3 tests and produces the labelled Assignment 3 improvement coverage report.'
+
+    dependsOn tasks.named('a3ImprovementRelatedCoverageLandingPage')
 }
