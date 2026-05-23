@@ -40,6 +40,8 @@ macos: ./gradlew :core:a3ImprovementRelatedCodeCoverage --console=plain
 ```
 Report Location: core/build/reports/jacoco/a3-improvement-related-code-coverage/jacoco-html/index.html
 
+**By the way, The percentage is low because our changes are small parts of a large existing game souce code.**
+
 ---
 
 ## Improvement 1: Configurable In-game Screenshot Shortcut
